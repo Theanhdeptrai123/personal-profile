@@ -1,62 +1,49 @@
-const reveals = document.querySelectorAll('.reveal');
+document.addEventListener("DOMContentLoaded", () => {
+  const burger = document.querySelector(".burger");
+  const navList = document.querySelector(".nav-list");
 
-const revealObserver = new IntersectionObserver(
-  (entries, observer) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('active');
-        const children = entry.target.querySelectorAll('.reveal-child');
-        children.forEach((child, i) => {
-          child.style.transitionDelay = `${i * 150}ms`;
-          child.classList.add('active');
-        });
-        observer.unobserve(entry.target);
+  burger.addEventListener("click", () => {
+    navList.classList.toggle("active");
+  });
+
+  const revealElements = document.querySelectorAll(".reveal");
+  const revealChildren = document.querySelectorAll(".reveal-child");
+
+  const revealOnScroll = () => {
+    const windowHeight = window.innerHeight;
+
+    revealElements.forEach((el) => {
+      const elementTop = el.getBoundingClientRect().top;
+      if (elementTop < windowHeight - 100) {
+        el.classList.add("active");
       }
     });
-  }, 
-  { threshold: 0.15 }
-);
 
-reveals.forEach(section => {
-  revealObserver.observe(section);
+    revealChildren.forEach((child) => {
+      const childTop = child.getBoundingClientRect().top;
+      if (childTop < windowHeight - 100) {
+        child.classList.add("active");
+      }
+    });
+  };
+
+  window.addEventListener("scroll", revealOnScroll);
+  revealOnScroll();
+
+  const shape1 = document.querySelector(".shape1");
+  const shape2 = document.querySelector(".shape2");
+  const shape3 = document.querySelector(".shape3");
+
+  let angle = 0;
+
+  const animateShapes = () => {
+    angle += 0.5;
+    const rad = angle * (Math.PI / 180);
+    shape1.style.transform = `translate(${Math.sin(rad) * 10}px, ${Math.cos(rad) * 10}px)`;
+    shape2.style.transform = `translate(${Math.cos(rad) * 15}px, ${Math.sin(rad) * 15}px)`;
+    shape3.style.transform = `translate(${Math.sin(rad * 0.5) * 20}px, ${Math.cos(rad * 0.5) * 20}px)`;
+    requestAnimationFrame(animateShapes);
+  };
+
+  animateShapes();
 });
-
-const shapes = document.querySelectorAll('.shape');
-
-window.addEventListener('scroll', () => {
-  const scrollY = window.scrollY;
-
-  shapes.forEach((shape, i) => {
-    const speed = (i + 1) * 0.25;
-    shape.style.transform = `translateY(${scrollY * speed}px)`;
-  });
-
-  highlightNavOnScroll();
-});
-
-document.querySelectorAll('nav ul li a').forEach(link => {
-  link.addEventListener('click', e => {
-    e.preventDefault();
-    const targetId = link.getAttribute('href').slice(1);
-    const targetSection = document.getElementById(targetId);
-    targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  });
-});
-
-function highlightNavOnScroll() {
-  const scrollPos = window.scrollY + window.innerHeight / 3;
-
-  document.querySelectorAll('section').forEach(section => {
-    const top = section.offsetTop;
-    const bottom = top + section.offsetHeight;
-
-    const navLink = document.querySelector(`nav ul li a[href="#${section.id}"]`);
-    if (!navLink) return;
-
-    if (scrollPos >= top && scrollPos < bottom) {
-      navLink.classList.add('active-nav');
-    } else {
-      navLink.classList.remove('active-nav');
-    }
-  });
-}
